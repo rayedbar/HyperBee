@@ -1,20 +1,25 @@
 package net.therap.hyperbee.domain;
 
-import org.joda.time.DateTime;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.*;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
-import static net.therap.hyperbee.domain.constant.DomainConstant.DATE_TIME_FIELD;
+import static net.therap.hyperbee.utils.constant.Constant.DATE_TIME_FIELD;
 
 /**
  * @author bashir
  * @author rayed
  * @author duity
  * @author azim
+ * @author zoha
  * @since 11/21/16
  */
 @Entity
@@ -24,17 +29,22 @@ public class Profile implements Serializable {
     private static final long serialVersionUID = 1;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(columnDefinition = DATE_TIME_FIELD)
-    private DateTime dateOfBirth;
+    @Column(columnDefinition = DATE_TIME_FIELD, name = "date_of_birth")
+    @DateTimeFormat(pattern = "dd-MM-yy")
+    private Calendar dateOfBirth;
 
     private String address;
 
+    @Column(name = "contact_no")
+    @Size(max = 20, message = "{profile.contact.required}")
     private String contactNo;
 
     private String skills;
 
+    @Column(name = "work_history")
     private String workHistory;
 
     private String designation;
@@ -45,13 +55,25 @@ public class Profile implements Serializable {
 
     private String university;
 
+    @Column(name = "job_experience_years")
     private int jobExperienceYears;
 
-    private DateTime joiningDate;
+    @Column(columnDefinition = DATE_TIME_FIELD, name = "joining_date")
+    @DateTimeFormat(pattern = "dd-MM-yy")
+    private Calendar joiningDate;
 
     private String gender;
 
+    @Column(name = "image")
     private String imagePath;
+
+    @Column(name = "cover_image")
+    private String coverImage;
+
+    public Profile() {
+        this.dateOfBirth = new GregorianCalendar();
+        this.joiningDate = new GregorianCalendar();
+    }
 
     public int getId() {
         return id;
@@ -61,11 +83,11 @@ public class Profile implements Serializable {
         this.id = id;
     }
 
-    public DateTime getDateOfBirth() {
+    public Calendar getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(DateTime dateOfBirth) {
+    public void setDateOfBirth(Calendar dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -133,11 +155,11 @@ public class Profile implements Serializable {
         this.jobExperienceYears = jobExperienceYears;
     }
 
-    public DateTime getJoiningDate() {
+    public Calendar getJoiningDate() {
         return joiningDate;
     }
 
-    public void setJoiningDate(DateTime joiningDate) {
+    public void setJoiningDate(Calendar joiningDate) {
         this.joiningDate = joiningDate;
     }
 
@@ -163,5 +185,13 @@ public class Profile implements Serializable {
 
     public void setContactNo(String contactNo) {
         this.contactNo = contactNo;
+    }
+
+    public String getCoverImage() {
+        return coverImage;
+    }
+
+    public void setCoverImage(String coverImage) {
+        this.coverImage = coverImage;
     }
 }

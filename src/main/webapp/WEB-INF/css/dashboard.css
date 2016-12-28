@@ -1,0 +1,88 @@
+/* Remove the navbar's default margin-bottom and rounded borders */
+.navbar {
+    margin-bottom: 0;
+    border-radius: 0;
+    box-shadow: 0 0 5px black;
+    text-shadow: 1px 1px black;
+}
+
+.btn-link {
+    padding: 0px;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+    color: #c0c0c0;
+}
+
+.navbar-inverse .navbar-brand {
+    color: silver;
+}
+
+.navbar-inverse .navbar-nav > li > a:hover {
+    color: ghostwhite;
+}
+
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus {
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+.row.content {
+    height: 100%
+}
+
+.top-padding {
+    padding-top: 70px;
+    display: table-cell;
+    height: inherit;
+}
+
+.pre-scrollable {
+    overflow-y: auto;
+}
+
+/* Set gray background color and 100% height */
+.sidenav {
+    background-color: #f1f1f1;
+}
+
+.set-activity-height {
+    max-height: 800px;
+}
+
+.fixed-panel {
+    min-height: 300px;
+}
+
+.panel-body {
+    word-break: break-all
+}
+
+.error-template {
+    padding: 40px 15px;
+    text-align: center;
+}
+
+.error-actions {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.error-actions .btn {
+    margin-right: 10px;
+}
+
+/* Set black background color, white text and some padding */
+footer {
+    background-color: #555;
+    color: white;
+    padding: 15px;
+}
+
+a {
+    text-decoration: none !important;
+    color: #000000;
+}

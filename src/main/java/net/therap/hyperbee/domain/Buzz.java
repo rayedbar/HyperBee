@@ -1,12 +1,13 @@
 package net.therap.hyperbee.domain;
 
 import net.therap.hyperbee.domain.enums.DisplayStatus;
-import org.joda.time.DateTime;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 
-import static net.therap.hyperbee.domain.constant.DomainConstant.*;
+import static net.therap.hyperbee.utils.constant.Constant.*;
 
 /**
  * @author bashir
@@ -18,6 +19,9 @@ import static net.therap.hyperbee.domain.constant.DomainConstant.*;
  */
 @Entity
 @Table(name = "buzz")
+@NamedQueries({
+        @NamedQuery(name = "buzz.getAll", query = "FROM Buzz")
+})
 public class Buzz implements Serializable {
 
     private static final long serialVersionUID = 1;
@@ -26,22 +30,38 @@ public class Buzz implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NotNull(message = "buzz.message.required")
     @Column(columnDefinition = TEXT_FIELD, nullable = false)
     private String message;
 
     @Column(name = "buzz_time", columnDefinition = DATE_TIME_FIELD, nullable = false)
-    private DateTime buzzTime;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date buzzTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = DISPLAY_STATUS_FIELD, columnDefinition = DISPLAY_STATUS_ENUM, nullable = false)
-    private DisplayStatus displayStatus;
+    private DisplayStatus displayStatus = DisplayStatus.ACTIVE;
 
-    @Column(columnDefinition = "BIT(1)", nullable = false)
+    @Column(columnDefinition = "INT(1)", nullable = false)
     private boolean pinned;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @Column(columnDefinition = "INT(1)", nullable = false)
+    private boolean flagged;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public Buzz() {
+        buzzTime = new Date();
+    }
+
+    public Buzz(String message, DisplayStatus displayStatus, boolean pinned) {
+        this.message = message;
+        this.buzzTime = new Date();
+        this.displayStatus = displayStatus;
+        this.pinned = pinned;
+    }
 
     public int getId() {
         return id;
@@ -59,12 +79,12 @@ public class Buzz implements Serializable {
         this.message = message;
     }
 
-    public DateTime getBuzzTime() {
+    public Date getBuzzTime() {
         return buzzTime;
     }
 
-    public void setBuzzTime(DateTime buzzTime) {
-        this.buzzTime = buzzTime;
+    public void setBuzzTime(long buzzTime) {
+        this.buzzTime.setTime(buzzTime);
     }
 
     public DisplayStatus getDisplayStatus() {
@@ -73,6 +93,10 @@ public class Buzz implements Serializable {
 
     public void setDisplayStatus(DisplayStatus displayStatus) {
         this.displayStatus = displayStatus;
+    }
+
+    public boolean isActive() {
+        return displayStatus == DisplayStatus.ACTIVE;
     }
 
     public boolean isPinned() {
@@ -89,5 +113,13 @@ public class Buzz implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public boolean isFlagged() {
+        return flagged;
+    }
+
+    public void setFlagged(boolean flagged) {
+        this.flagged = flagged;
     }
 }

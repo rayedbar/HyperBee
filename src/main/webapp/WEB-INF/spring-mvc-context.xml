@@ -18,8 +18,6 @@
     <context:component-scan base-package="net.therap.hyperbee.dao"/>
     <context:component-scan base-package="net.therap.hyperbee.service"/>
     <context:component-scan base-package="net.therap.hyperbee.utils"/>
-    <context:component-scan base-package="net.therap.hyperbee.web.validator"/>
-
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
@@ -30,7 +28,7 @@
 
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="location">
-            <value>/WEB-INF/classes/database.properties</value>
+            <value>classpath:database.properties</value>
         </property>
     </bean>
 
@@ -45,7 +43,7 @@
           p:packagesToScan="net.therap.hyperbee.domain" p:dataSource-ref="datasource">
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-                <property name="showSql" value="false"/>
+                <property name="showSql" value="true"/>
                 <property name="generateDdl" value="true"/>
             </bean>
         </property>
@@ -55,18 +53,43 @@
         <property name="entityManagerFactory" ref="entityManagerFactory"/>
     </bean>
 
-    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="ApplicationResources"/>
+    </bean>
 
-    <bean id="myBeansValidator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
         <property name="validationMessageSource" ref="messageSource"/>
     </bean>
 
-    <bean id="messageSource"
-          class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
-          p:basename="/WEB-INF/classes/ValidationMessages"/>
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="5000000000000"/>
+    </bean>
 
-    <mvc:resources mapping="/statics/**" location="/statics/"/>
-    <mvc:annotation-driven validator="myBeansValidator"/>
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor">
+                <property name="entityManagerFactory" ref="entityManagerFactory"/>
+            </bean>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean id="webContentInterceptor" class="org.springframework.web.servlet.mvc.WebContentInterceptor">
+                <property name="cacheSeconds" value="0"/>
+                <property name="useExpiresHeader" value="true"/>
+                <property name="useCacheControlHeader" value="true"/>
+                <property name="useCacheControlNoStore" value="true"/>
+            </bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <mvc:resources mapping="/css/**" location="/WEB-INF/css/"/>
+    <mvc:resources mapping="/js/**" location="/WEB-INF/js/"/>
+    <mvc:resources mapping="/fonts/**" location="/WEB-INF/fonts/"/>
+    <mvc:resources mapping="/images/**" location="/WEB-INF/images/"/>
+
+    <mvc:annotation-driven validator="validator" />
     <mvc:annotation-driven/>
-
 </beans>

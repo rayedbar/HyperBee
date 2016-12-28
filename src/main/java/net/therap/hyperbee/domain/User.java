@@ -1,58 +1,73 @@
 package net.therap.hyperbee.domain;
 
 import net.therap.hyperbee.domain.enums.DisplayStatus;
+import net.therap.hyperbee.domain.enums.RoleType;
+import net.therap.hyperbee.web.security.AuthUser;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-import static net.therap.hyperbee.domain.constant.DomainConstant.DISPLAY_STATUS_ENUM;
-import static net.therap.hyperbee.domain.constant.DomainConstant.DISPLAY_STATUS_FIELD;
+import static net.therap.hyperbee.utils.constant.Constant.DISPLAY_STATUS_ENUM;
+import static net.therap.hyperbee.utils.constant.Constant.DISPLAY_STATUS_FIELD;
 
 /**
  * @author bashir
  * @author rayed
- * @author duity
- * @author azim
  * @since 11/21/16
  */
 @Entity
+@NamedQueries({
+        @NamedQuery(name = "User.findByUsernameOrEmail",
+                query = "SELECT u FROM User u WHERE u.username = :username OR u.email = :email ")
+})
 @Table(name = "user")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NotNull
+    @Size(min = 1, message = "{username.required}")
+    @Column(name = "username")
     private String username;
 
+    @Column(name = "first_name")
     private String firstName;
 
+    @Column(name = "last_name")
     private String lastName;
 
     private String email;
 
+    @NotNull
+    @Size(min = 1, message = "{password.required}")
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(name = DISPLAY_STATUS_FIELD, columnDefinition = DISPLAY_STATUS_ENUM)
     private DisplayStatus displayStatus;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "profile_id")
     private Profile profile;
 
     @OneToMany(mappedBy = "user")
     private List<Activity> activityList;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
     private List<Note> noteList;
 
     @OneToMany(mappedBy = "user")
     private List<Post> postList;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_id", nullable = false),
@@ -72,7 +87,21 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user")
     private List<Reservation> reservationList;
 
+    public User() {
+        profile = new Profile();
+        displayStatus = DisplayStatus.ACTIVE;
+        activityList = new ArrayList<Activity>();
+        noteList = new ArrayList<Note>();
+        postList = new ArrayList<Post>();
+        roleList = new ArrayList<Role>();
+        hiveList = new ArrayList<Hive>();
+        noticeList = new ArrayList<Notice>();
+        buzzList = new ArrayList<Buzz>();
+        reservationList = new ArrayList<Reservation>();
+    }
+
     public int getId() {
+
         return id;
     }
 
@@ -81,6 +110,7 @@ public class User implements Serializable {
     }
 
     public String getUsername() {
+
         return username;
     }
 
@@ -89,6 +119,7 @@ public class User implements Serializable {
     }
 
     public String getFirstName() {
+
         return firstName;
     }
 
@@ -97,6 +128,7 @@ public class User implements Serializable {
     }
 
     public String getLastName() {
+
         return lastName;
     }
 
@@ -105,6 +137,7 @@ public class User implements Serializable {
     }
 
     public String getEmail() {
+
         return email;
     }
 
@@ -113,6 +146,7 @@ public class User implements Serializable {
     }
 
     public String getPassword() {
+
         return password;
     }
 
@@ -121,6 +155,7 @@ public class User implements Serializable {
     }
 
     public DisplayStatus getDisplayStatus() {
+
         return displayStatus;
     }
 
@@ -129,6 +164,7 @@ public class User implements Serializable {
     }
 
     public Profile getProfile() {
+
         return profile;
     }
 
@@ -137,6 +173,7 @@ public class User implements Serializable {
     }
 
     public List<Activity> getActivityList() {
+
         return activityList;
     }
 
@@ -145,6 +182,7 @@ public class User implements Serializable {
     }
 
     public List<Note> getNoteList() {
+
         return noteList;
     }
 
@@ -153,6 +191,7 @@ public class User implements Serializable {
     }
 
     public List<Post> getPostList() {
+
         return postList;
     }
 
@@ -161,6 +200,7 @@ public class User implements Serializable {
     }
 
     public List<Role> getRoleList() {
+
         return roleList;
     }
 
@@ -169,6 +209,7 @@ public class User implements Serializable {
     }
 
     public List<Hive> getHiveList() {
+
         return hiveList;
     }
 
@@ -177,6 +218,7 @@ public class User implements Serializable {
     }
 
     public List<Notice> getNoticeList() {
+
         return noticeList;
     }
 
@@ -185,6 +227,7 @@ public class User implements Serializable {
     }
 
     public List<Buzz> getBuzzList() {
+
         return buzzList;
     }
 
@@ -193,10 +236,45 @@ public class User implements Serializable {
     }
 
     public List<Reservation> getReservationList() {
+
         return reservationList;
     }
 
     public void setReservationList(List<Reservation> reservationList) {
         this.reservationList = reservationList;
+    }
+
+    public boolean isNew() {
+
+        return (id == 0);
+    }
+
+    public AuthUser getAuthUser() {
+
+        return new AuthUser(id, username, roleList);
+    }
+
+    public boolean isAdmin() {
+        for (Role role : roleList) {
+            if (role.getRoleType() == RoleType.ADMIN) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public String toString() {
+
+        return "id: " + id +
+                "\nUsername: " + username +
+                "\nFist Name: " + firstName +
+                "\nLast Name: " + lastName +
+                "\nEmail: " + email +
+                "\nPassword: " + password +
+                "\nRole List: " + roleList;
+
     }
 }

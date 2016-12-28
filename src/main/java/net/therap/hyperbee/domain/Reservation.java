@@ -1,19 +1,21 @@
 package net.therap.hyperbee.domain;
 
 import net.therap.hyperbee.domain.enums.ReservationStatus;
-import org.joda.time.DateTime;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
-import static net.therap.hyperbee.domain.constant.DomainConstant.DATE_TIME_FIELD;
-import static net.therap.hyperbee.domain.constant.DomainConstant.RES_STATUS_ENUM;
+import static net.therap.hyperbee.utils.constant.Constant.DATE_TIME_FIELD;
+import static net.therap.hyperbee.utils.constant.Constant.RES_STATUS_ENUM;
 
 /**
  * @author bashir
  * @author rumman
  * @author rayed
  * @author azim
+ * @author zoha
  * @since 11/21/16
  */
 @Entity
@@ -23,6 +25,7 @@ public class Reservation implements Serializable {
     private static final long serialVersionUID = 1;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Enumerated(EnumType.STRING)
@@ -30,10 +33,12 @@ public class Reservation implements Serializable {
     private ReservationStatus reservationStatus;
 
     @Column(columnDefinition = DATE_TIME_FIELD)
-    private DateTime reservationFrom;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Calendar reservationFrom;
 
     @Column(columnDefinition = DATE_TIME_FIELD)
-    private DateTime reservationTo;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Calendar reservationTo;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -42,6 +47,9 @@ public class Reservation implements Serializable {
     @ManyToOne
     @JoinColumn(name = "conf_id")
     private ConferenceRoom conferenceRoom;
+
+    public Reservation() {
+    }
 
     public int getId() {
         return id;
@@ -59,19 +67,19 @@ public class Reservation implements Serializable {
         this.reservationStatus = reservationStatus;
     }
 
-    public DateTime getReservationFrom() {
+    public Calendar getReservationFrom() {
         return reservationFrom;
     }
 
-    public void setReservationFrom(DateTime reservationFrom) {
+    public void setReservationFrom(Calendar reservationFrom) {
         this.reservationFrom = reservationFrom;
     }
 
-    public DateTime getReservationTo() {
+    public Calendar getReservationTo() {
         return reservationTo;
     }
 
-    public void setReservationTo(DateTime reservationTo) {
+    public void setReservationTo(Calendar reservationTo) {
         this.reservationTo = reservationTo;
     }
 
@@ -89,5 +97,31 @@ public class Reservation implements Serializable {
 
     public void setConferenceRoom(ConferenceRoom conferenceRoom) {
         this.conferenceRoom = conferenceRoom;
+    }
+
+    public boolean isNew() {
+        return id == 0;
+    }
+
+    public String getFormattedFromDate() {
+        if (null == reservationFrom) {
+
+            return "";
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+
+        return sdf.format(reservationFrom.getTimeInMillis());
+    }
+
+    public String getFormattedToDate() {
+        if (null == reservationTo) {
+
+            return "";
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+
+        return sdf.format(reservationTo.getTimeInMillis());
     }
 }

@@ -1,24 +1,25 @@
 package net.therap.hyperbee.domain.enums;
 
-import net.therap.hyperbee.domain.constant.DomainConstant;
+import net.therap.hyperbee.utils.constant.Constant;
 
 /**
  * @author bashir
+ * @author rumman
  * @since 11/21/16
  */
 public enum ReservationStatus {
 
-    APPROVED(DomainConstant.APPROVED),
-    REJECTED(DomainConstant.REJECTED),
-    PENDING(DomainConstant.PENDING);
+    APPROVED(Constant.APPROVED),
+    REJECTED(Constant.REJECTED),
+    PENDING(Constant.PENDING);
 
-    private String reservationStatus;
+    private String status;
 
-    ReservationStatus(String reservationStatus) {
-        this.reservationStatus = reservationStatus;
+    ReservationStatus(String status) {
+        this.status = status;
     }
 
-    public String getReservationStatus() {
-        return reservationStatus;
+    public String getStatus() {
+        return status;
     }
 }

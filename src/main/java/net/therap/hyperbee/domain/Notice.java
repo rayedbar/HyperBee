@@ -1,21 +1,32 @@
 package net.therap.hyperbee.domain;
 
 import net.therap.hyperbee.domain.enums.DisplayStatus;
-import org.joda.time.DateTime;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
-import static net.therap.hyperbee.domain.constant.DomainConstant.*;
+import static net.therap.hyperbee.utils.constant.Constant.*;
 
 /**
  * @author bashir
  * @author rumman
  * @author rayed
  * @author azim
+ * @author zoha
  * @since 11/21/16
  */
+@NamedQueries({
+        @NamedQuery(name = "Notice.findAllNotice",
+                query = "SELECT notice FROM Notice notice ORDER BY notice.id DESC"),
+        @NamedQuery(name = "Notice.findLatestNotices",
+                query = "SELECT notice FROM Notice notice WHERE notice.displayStatus = 'ACTIVE' ORDER BY notice.id DESC")
+})
 @Entity
 @Table(name = "notice")
 public class Notice implements Serializable {
@@ -23,17 +34,19 @@ public class Notice implements Serializable {
     private static final long serialVersionUID = 1;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private String title;
 
     private String description;
 
-    @Column(columnDefinition = DATE_TIME_FIELD)
-    private DateTime dateCreated;
+    @Column(columnDefinition = DATE_TIME_FIELD, name = "date_created")
+    private Calendar dateCreated;
 
-    @Column(columnDefinition = DATE_TIME_FIELD)
-    private DateTime dateExpired;
+    @Column(columnDefinition = DATE_TIME_FIELD, name = "date_expired")
+    @DateTimeFormat(pattern = "dd-MM-yy")
+    private Calendar dateExpired;
 
     @Enumerated(EnumType.STRING)
     @Column(name = DISPLAY_STATUS_FIELD, columnDefinition = DISPLAY_STATUS_ENUM)
@@ -43,8 +56,18 @@ public class Notice implements Serializable {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToMany(mappedBy = "noticeList")
+    @ManyToMany
+    @JoinTable(
+            name = "notice_hive",
+            joinColumns = @JoinColumn(name = "notice_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "hive_id", nullable = false)
+    )
     private List<Hive> hiveList;
+
+    public Notice() {
+        hiveList = new ArrayList<>();
+        this.dateCreated = new GregorianCalendar();
+    }
 
     public int getId() {
         return id;
@@ -70,19 +93,19 @@ public class Notice implements Serializable {
         this.description = description;
     }
 
-    public DateTime getDateCreated() {
+    public Calendar getDateCreated() {
         return dateCreated;
     }
 
-    public void setDateCreated(DateTime dateCreated) {
+    public void setDateCreated(Calendar dateCreated) {
         this.dateCreated = dateCreated;
     }
 
-    public DateTime getDateExpired() {
+    public Calendar getDateExpired() {
         return dateExpired;
     }
 
-    public void setDateExpired(DateTime dateExpired) {
+    public void setDateExpired(Calendar dateExpired) {
         this.dateExpired = dateExpired;
     }
 
@@ -108,5 +131,20 @@ public class Notice implements Serializable {
 
     public void setHiveList(List<Hive> hiveList) {
         this.hiveList = hiveList;
+    }
+
+    public boolean isNew() {
+        return id == 0;
+    }
+
+    public String getRemindDateFormatted() {
+        if (null == dateExpired) {
+
+            return "";
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+
+        return sdf.format(dateExpired.getTimeInMillis());
     }
 }
